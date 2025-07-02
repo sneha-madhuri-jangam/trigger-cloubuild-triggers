@@ -1,19 +1,36 @@
+# cloudbuild.yaml
+#
+# This Cloud Build configuration will:
+# 1. Build your Docker image for the React application.
+# 2. Tag the image with 'latest'.
+# 3. Push the tagged image to your specified Artifact Registry repository.
+#
+# Project ID: sublime-state-464613-s9
+# Region: us-central1
+# Artifact Registry Repo: react-app-repo
+# Image Name: my-react-app-service (this will be the name of the image in AR)
+
 steps:
   # Step 1: Build the Docker image
+  # This step uses the 'docker' Cloud Builder to build the image.
+  # '-t' tags the image with the full Artifact Registry path and 'latest'.
+  # '.' indicates that the Dockerfile and build context are in the current directory.
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'us-central1-docker.pkg.dev/sublime-state-464613-s9/react-app-repo/my-react-app-service:latest', '.']
+    args:
       - 'build'
       - '-t'
-      - 'us-central1-docker.pkg.dev/sublime-state-464613-s9/react-app-repo/my-react-app-service:$COMMIT_SHA'
+      - 'us-central1-docker.pkg.dev/sublime-state-464613-s9/react-app-repo/my-react-app-service:latest'
       - '.'
 
   # Step 2: Push the image to Artifact Registry
+  # This step uses the 'docker' Cloud Builder to push the newly built image
+  # to your Artifact Registry repository.
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'us-central1-docker.pkg.dev/sublime-state-464613-s9/react-app-repo/my-react-app-service:latest']
+    args:
       - 'push'
-      - 'us-central1-docker.pkg.dev/sublime-state-464613-s9/react-app-repo/my-react-app-service:$COMMIT_SHA'
+      - 'us-central1-docker.pkg.dev/sublime-state-464613-s9/react-app-repo/my-react-app-service:latest'
 
+# The 'images' field specifies which images should be pushed to Artifact Registry
+# after all build steps are completed successfully.
 images:
   - 'us-central1-docker.pkg.dev/sublime-state-464613-s9/react-app-repo/my-react-app-service:latest'
-
-
