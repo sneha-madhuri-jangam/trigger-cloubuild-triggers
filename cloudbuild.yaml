@@ -1,0 +1,17 @@
+steps:
+  # Step 1: Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/sublime-state-464613-s9/react-app-repo/my-react-app-service:$COMMIT_SHA'
+      - '.'
+
+  # Step 2: Push the image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'us-central1-docker.pkg.dev/sublime-state-464613-s9/react-app-repo/my-react-app-service:$COMMIT_SHA'
+
+images:
+  - 'us-central1-docker.pkg.dev/sublime-state-464613-s9/react-app-repo/my-react-app-service:$COMMIT_SHA'
