@@ -7,8 +7,7 @@ function App() {
       <div>
         <h1>Hey Hi sneha </h1>
 
-        <h2>its okay @@</h2>
-
+<h2>okay .....</h2>
 
       </div>
     </div>
