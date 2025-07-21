@@ -12,10 +12,7 @@
 # Image Name: my-react-app-service
 
 steps:
-  # Step 1: Build the Docker image
-  # This step uses the 'docker' Cloud Builder to build the image.
-  # '-t' tags the image with the full Artifact Registry path.
-  # $COMMIT_SHA is an automatic Cloud Build substitution variable.
+    # Step 1: Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
@@ -26,32 +23,32 @@ steps:
       - '.'
 
   # Step 2: Push the image to Artifact Registry
-  # Pushes both the 'latest' and '$COMMIT_SHA' tagged images.
   - name: 'gcr.io/cloud-builders/docker'
+    id: Push-to-AR
     args:
       - 'push'
+      - '--all-tags'
       - 'us-central1-docker.pkg.dev/sublime-state-464613-s9/react-app-repo/my-react-app-service'
-    # Use '--all-tags' to push both tags. This is a cleaner way to push all tags for the image.
-    id: Push-to-AR
 
   # Step 3: Deploy the image to Cloud Run
-  # This step uses the 'gcloud' Cloud Builder to deploy to Cloud Run.
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: gcloud
+    entrypoint: 'gcloud'
     args:
       - 'run'
       - 'deploy'
-      - 'my-react-app-service' # Replace with your desired Cloud Run service name (e.g., 'my-react-app-service')
+      - 'my-react-app-service'
       - '--image'
       - 'us-central1-docker.pkg.dev/sublime-state-464613-s9/react-app-repo/my-react-app-service:latest'
       - '--region'
       - 'us-central1'
       - '--platform'
       - 'managed'
-      - '--allow-unauthenticated' # Use this if you want a public-facing web app
+      - '--allow-unauthenticated'
 
-# The 'images' field specifies which images should be pushed to Artifact Registry
-# after all build steps are completed successfully. This is optional but good practice.
+# Images to push after successful build (optional but recommended)
 images:
   - 'us-central1-docker.pkg.dev/sublime-state-464613-s9/react-app-repo/my-react-app-service:latest'
   - 'us-central1-docker.pkg.dev/sublime-state-464613-s9/react-app-repo/my-react-app-service:$COMMIT_SHA'
+# Add this entire options block at the end of your file
+options:
+  logging: CLOUD_LOGGING_ONLY
