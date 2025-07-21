@@ -7,8 +7,7 @@ function App() {
       <div>
         <h1>Hey Hi sneha </h1>
 
-<h2>okay .....</h2>
-
+<h2>Let's check the whether cloud build trigger working or not </h2>
       </div>
     </div>
   );

@@ -2,35 +2,56 @@
 #
 # This Cloud Build configuration will:
 # 1. Build your Docker image for the React application.
-# 2. Tag the image with 'latest'.
-# 3. Push the tagged image to your specified Artifact Registry repository.
+# 2. Tag the image with 'latest' and a unique commit SHA.
+# 3. Push the tagged images to your specified Artifact Registry repository.
+# 4. Deploy the latest image to a Cloud Run service.
 #
 # Project ID: sublime-state-464613-s9
 # Region: us-central1
 # Artifact Registry Repo: react-app-repo
-# Image Name: my-react-app-service (this will be the name of the image in AR)
+# Image Name: my-react-app-service
 
 steps:
   # Step 1: Build the Docker image
   # This step uses the 'docker' Cloud Builder to build the image.
-  # '-t' tags the image with the full Artifact Registry path and 'latest'.
-  # '.' indicates that the Dockerfile and build context are in the current directory.
+  # '-t' tags the image with the full Artifact Registry path.
+  # $COMMIT_SHA is an automatic Cloud Build substitution variable.
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
       - '-t'
       - 'us-central1-docker.pkg.dev/sublime-state-464613-s9/react-app-repo/my-react-app-service:latest'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/sublime-state-464613-s9/react-app-repo/my-react-app-service:$COMMIT_SHA'
       - '.'
 
   # Step 2: Push the image to Artifact Registry
-  # This step uses the 'docker' Cloud Builder to push the newly built image
-  # to your Artifact Registry repository.
+  # Pushes both the 'latest' and '$COMMIT_SHA' tagged images.
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
+      - 'us-central1-docker.pkg.dev/sublime-state-464613-s9/react-app-repo/my-react-app-service'
+    # Use '--all-tags' to push both tags. This is a cleaner way to push all tags for the image.
+    id: Push-to-AR
+
+  # Step 3: Deploy the image to Cloud Run
+  # This step uses the 'gcloud' Cloud Builder to deploy to Cloud Run.
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'my-react-app-service' # Replace with your desired Cloud Run service name (e.g., 'my-react-app-service')
+      - '--image'
       - 'us-central1-docker.pkg.dev/sublime-state-464613-s9/react-app-repo/my-react-app-service:latest'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated' # Use this if you want a public-facing web app
 
 # The 'images' field specifies which images should be pushed to Artifact Registry
-# after all build steps are completed successfully.
+# after all build steps are completed successfully. This is optional but good practice.
 images:
   - 'us-central1-docker.pkg.dev/sublime-state-464613-s9/react-app-repo/my-react-app-service:latest'
+  - 'us-central1-docker.pkg.dev/sublime-state-464613-s9/react-app-repo/my-react-app-service:$COMMIT_SHA'

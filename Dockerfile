@@ -8,7 +8,6 @@ RUN npm run build
 
 # Stage 2: Serve the React application with Nginx
 FROM nginx:alpine 
-# <-- This is the key!
 
 # Copy the built React app from the build stage to Nginx's HTML directory
 COPY --from=build /app/build /usr/share/nginx/html
